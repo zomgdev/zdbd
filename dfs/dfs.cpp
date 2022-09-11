@@ -66,7 +66,11 @@ static int DFSStartup(ZDFS *inCfg) {
 	return ReturnCode;
 }
 
+static char* CheckDirectoryStructure(char *path) {
+	char* DataDirPath;
 
+	return DataDirPath;
+}
 
 int main(int argc, char const* argv[]) {
 	
