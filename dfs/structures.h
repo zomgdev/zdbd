@@ -1,17 +1,30 @@
-#pragma once
+#ifndef ZDFS_STRUCTURES_H
+#define ZDFS_STRUCTURES_H
+
+#include "defaults.h"
+#include <string>
 
 
-#ifndef DFS_STRUCTURES_H
-#define DFS_STRUCTURES_H
-
-#define DEFAULT_DFS_BLOCK_SIZE 254*1024*1024;
-
-class zomgFS {
-
+class ZDFS {
 private:
+	int ZDFS_BlockSize;
 
 public:
-	zomgFS() {
-
-	}
+	ZDFS();
 };
+
+class ZDFSDaemon{
+private:
+	unsigned long long* MaxHeapMemory;
+
+	std::string ZDFS_DataDirPath;
+	std::string ZDFS_MetadataDirPath;
+	std::string ZDFS_BlocksDirPath;
+	std::string ZDFS_WALDirPath;
+
+public:
+	void NodeStart(ZDFS* Instance);
+	ZDFSDaemon(void);
+};
+
+#endif

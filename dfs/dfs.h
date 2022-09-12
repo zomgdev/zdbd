@@ -1,8 +1,6 @@
-﻿// server.h : Include file for standard system include files,
-// or project specific include files.
-
-#pragma once
+﻿#ifndef ZDFS_DFS_H
+#define ZDFS_DFS_H
 
 #include <iostream>
 
-// TODO: Reference additional headers your program requires here.
+#endif

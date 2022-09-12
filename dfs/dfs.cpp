@@ -1,4 +1,5 @@
 ﻿#include "dfs.h"
+#include "structures.h"
 
 #include <iostream>
 #include <arpa/inet.h>
@@ -10,30 +11,6 @@
 
 using namespace std;
 
-// Абсолютный путь до конфига по-умолчанию
-#define DEFAULT_CONFIG_FILE_PATH "/etc/zdfs/zdfs.conf";
-
-// Имя конфига по-умолчанию
-#define DEFAULT_CONFIG_FILE_NAME "zdfs.conf";
-
-// Путь к каталогу данных по умолчанию
-#define DEFAULT_DATA_DIR     "/var/lib/zdfs";
-#define DEFAULT_BLOCKS_DIR   "/var/lib/zdfs/storage";
-#define DEFAULT_METADATA_DIR "/var/lib/zdfs/metadata";
-#define DEFAULT_WAL_DIR      "/var/lib/zdfs/wal";
-
-// Параметры файловой системы
-#define DEFAULT_BLOCK_SIZE   128*1024*1024;
-#define DEFAULT_STORAGE_SIZE 1000*1024*1024;
-
-
-class ZDFS {
-
-public:
-	char* ZDFS_DataDirPath;
-	long* ZDFS_BlockSize;
-	long* MaxHeapMemory;
-};
 
 
 // Алгоритм проверки настроек:
@@ -74,12 +51,18 @@ static char* CheckDirectoryStructure(char *path) {
 
 int main(int argc, char const* argv[]) {
 	
-	ZDFS *DFSConfig = new(ZDFS);
+	// Сюда будем запихивать параметры самой DFS, а пока пользуемся дефолтным конструктором.
+	ZDFS *ZDFSConfig = new(ZDFS);
 
-	// get command line parameters
+	// А здесь будут параметры работы демона.
+	ZDFSDaemon* DFSdaemon = new(ZDFSDaemon);
+
+	string cfgPath;
+
+	// get and parse command line parameters
 	if ( argc > 1) {
 		//проверка опций командной строки(help, version и выход)
-
+		cout << "Программист ленив, по этому пока игнорируем опции командной строки. Но обработчик обязательно появится." << endl;
 	} else {
 		cout << "There is no incoming parameters using default settings:" << endl;
 		//cout << "Config: " << endl;
@@ -91,7 +74,6 @@ int main(int argc, char const* argv[]) {
 	//	cout << "Arg: " << argnum << " " << argv[argnum] << endl;
 	//}
 
-	string cfgPath;
 
 	cfgPath = (string)argv[0] + '/' + DEFAULT_CONFIG_FILE_NAME;
 
@@ -105,7 +87,7 @@ int main(int argc, char const* argv[]) {
 
 
 	// Старт DFS
-	DFSStartup(DFSConfig);
+	DFSStartup(ZDFSConfig);
 
 
 
