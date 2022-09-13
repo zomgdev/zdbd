@@ -1,7 +1,7 @@
 #include "structures.h"
 #include <string>
 
-// Конструктор для ZDFS
+// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РґР»СЏ ZDFS
 ZDFS::ZDFS(void) {
 	ZDFS_BlockSize = DEFAULT_BLOCK_SIZE;
 }

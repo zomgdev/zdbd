@@ -1,7 +1,7 @@
 #ifndef ZDFS_DEFAULTS_H
 #define ZDFS_DEFAULTS_H
 
-// Настройки по умолчанию для основных параметров 
+// РќР°СЃС‚СЂРѕР№РєРё РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РґР»СЏ РѕСЃРЅРѕРІРЅС‹С… РїР°СЂР°РјРµС‚СЂРѕРІ 
 // Default settings
 
 
@@ -10,15 +10,15 @@
 // Daemon settings
 // 
 
-// Абсолютный путь до конфига по умолчанию
+// РђР±СЃРѕР»СЋС‚РЅС‹Р№ РїСѓС‚СЊ РґРѕ РєРѕРЅС„РёРіР° РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 // ZDFS config files path
 #define DEFAULT_CONFIG_FILES_DIR  "/etc/zdfs";
 
-// Имя конфигов по умолчанию
+// РРјСЏ РєРѕРЅС„РёРіРѕРІ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 // Configuration files names
 #define DEFAULT_CONFIG_FILE_NAME  "zdfs.conf";
 
-// Путь к каталогу данных по умолчанию
+// РџСѓС‚СЊ Рє РєР°С‚Р°Р»РѕРіСѓ РґР°РЅРЅС‹С… РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 // Data directory paths
 #define DEFAULT_DATA_DIR_PATH     "/var/lib/zdfs";
 #define DEFAULT_BLOCKS_DIR_PATH   "/var/lib/zdfs/storage";
@@ -29,7 +29,7 @@
 // ZDFS settings
 // 
 
-// Базовые параметры файловой системы
+// Р‘Р°Р·РѕРІС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ С„Р°Р№Р»РѕРІРѕР№ СЃРёСЃС‚РµРјС‹
 // Filesystem base parameters
 #define DEFAULT_BLOCK_SIZE   128*1024*1024;
 #define DEFAULT_STORAGE_SIZE 4*1024*1024*1024;
