@@ -1,5 +1,6 @@
 #include "dfs.h"
 #include "structures.h"
+#include "fileutils.h"
 
 #include <iostream>
 #include <arpa/inet.h>
@@ -7,10 +8,10 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
-
+#include <filesystem>
 
 using namespace std;
-
+//namespace fs = std::filesystem;
 
 
 // Алгоритм проверки настроек:
@@ -57,7 +58,7 @@ int main(int argc, char const* argv[]) {
 	// А здесь будут параметры работы демона.
 	ZDFSDaemon* DFSdaemon = new(ZDFSDaemon);
 
-	string cfgPath;
+	string cfgPath, dataPath, metadataPath;
 
 	// get and parse command line parameters
 	if ( argc > 1) {
@@ -76,6 +77,18 @@ int main(int argc, char const* argv[]) {
 
 
 	cfgPath = (string)argv[0] + '/' + DEFAULT_CONFIG_FILE_NAME;
+
+	dataPath = "./data";
+
+	//dataPath, metadataPath
+	fs::path dataDir{ dataPath };
+	
+	for (const auto& entry : fs::directory_iterator(dataDir)) {
+		
+		if(isFileExists(entry, entry.status()));
+
+
+	}
 
 	cout << "CFGPATH: " << cfgPath << endl;
 

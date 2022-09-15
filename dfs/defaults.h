@@ -1,5 +1,4 @@
-#ifndef ZDFS_DEFAULTS_H
-#define ZDFS_DEFAULTS_H
+#pragma once
 
 // Настройки по умолчанию для основных параметров 
 // Default settings
@@ -33,5 +32,3 @@
 // Filesystem base parameters
 #define DEFAULT_BLOCK_SIZE   128*1024*1024;
 #define DEFAULT_STORAGE_SIZE 4*1024*1024*1024;
-
-#endif

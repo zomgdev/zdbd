@@ -1,5 +1,4 @@
-#ifndef ZDFS_SYSUTILS_H
-#define ZDFS_SYSUTILS_H
+#pragma once
 
 #include "structures.h"
 #include <string>
@@ -21,5 +20,3 @@ public:
 	ZDFSParameters(&config);
 	sysCheck();
 };
-
-#end

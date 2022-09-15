@@ -1,5 +1,4 @@
-#ifndef ZDFS_STRUCTURES_H
-#define ZDFS_STRUCTURES_H
+#pragma once
 
 #include "defaults.h"
 #include <string>
@@ -17,7 +16,7 @@ class ZDFSDaemon{
 private:
 	unsigned long long* MaxHeapMemory;
 
-	std::string ZDFS_DataDirPath;
+	std::string ZDFS_RootDirPath;
 	std::string ZDFS_MetadataDirPath;
 	std::string ZDFS_BlocksDirPath;
 	std::string ZDFS_WALDirPath;
@@ -27,4 +26,3 @@ public:
 	ZDFSDaemon(void);
 };
 
-#endif

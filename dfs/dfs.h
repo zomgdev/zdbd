@@ -1,6 +1,5 @@
-﻿#ifndef ZDFS_DFS_H
-#define ZDFS_DFS_H
+﻿#pragma once
+
 
 #include <iostream>
 
-#endif
