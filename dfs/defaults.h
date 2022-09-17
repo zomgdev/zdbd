@@ -1,5 +1,5 @@
 #pragma once
-
+#define DEBUG
 // Настройки по умолчанию для основных параметров 
 // Default settings
 
@@ -19,10 +19,23 @@
 
 // Путь к каталогу данных по умолчанию
 // Data directory paths
-#define DEFAULT_DATA_DIR_PATH     "/var/lib/zdfs";
-#define DEFAULT_BLOCKS_DIR_PATH   "/var/lib/zdfs/storage";
-#define DEFAULT_METADATA_DIR_PATH "/var/lib/zdfs/metadata";
-#define DEFAULT_WAL_DIR_PATH      "/var/lib/zdfs/wal";
+
+#ifdef DEBUG
+
+#define DEFAULT_DATA_DIR_PATH     "./data";
+#define DEFAULT_BLOCKS_DIR_PATH   "./data/blocks";
+#define DEFAULT_METADATA_DIR_PATH "./data/metadata";
+#define DEFAULT_WAL_DIR_PATH      "./data/wal";
+
+#else
+
+ #define DEFAULT_DATA_DIR_PATH     "/var/lib/zdfs";
+ #define DEFAULT_BLOCKS_DIR_PATH   "/var/lib/zdfs/blocks";
+ #define DEFAULT_METADATA_DIR_PATH "/var/lib/zdfs/metadata";
+ #define DEFAULT_WAL_DIR_PATH      "/var/lib/zdfs/wal";
+
+#endif // DEBUG
+
 
 // 
 // ZDFS settings

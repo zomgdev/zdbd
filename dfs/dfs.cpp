@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include <filesystem>
 
+#define DEBUG
+
 using namespace std;
 //namespace fs = std::filesystem;
 
@@ -56,7 +58,7 @@ int main(int argc, char const* argv[]) {
 	ZDFS *ZDFSConfig = new(ZDFS);
 
 	// А здесь будут параметры работы демона.
-	ZDFSDaemon* DFSdaemon = new(ZDFSDaemon);
+	ZDFSDaemon* DFSdaemon = new ZDFSDaemon();
 
 	string cfgPath, dataPath, metadataPath;
 
@@ -71,26 +73,53 @@ int main(int argc, char const* argv[]) {
 		//cout << "Block size: " << endl;
 	}
 
+	// Продолжаем разбирать командную строку.
+	// Todo: доработать детальный разбор командной строки
+	// 
 	//for (int argnum = 0; argnum < argc; ++argnum) {
 	//	cout << "Arg: " << argnum << " " << argv[argnum] << endl;
 	//}
 
-
+	// 
 	cfgPath = (string)argv[0] + '/' + DEFAULT_CONFIG_FILE_NAME;
-
-	dataPath = "./data";
+	
+	cout << "CFGPATH: " << cfgPath << endl;
 
 	//dataPath, metadataPath
-	fs::path dataDir{ dataPath };
+	fs::path DataDirPath     { DFSdaemon->ZDFS_RootDirPath };
+	fs::path BlocksDirPath   { DFSdaemon->ZDFS_BlocksDirPath };
+	fs::path MetadataDirPath { DFSdaemon->ZDFS_MetadataDirPath };
+	fs::path WALDirPath      { DFSdaemon->ZDFS_WALDirPath };
 	
-	for (const auto& entry : fs::directory_iterator(dataDir)) {
-		
-		if(isFileExists(entry, entry.status()));
-
-
+	// Checking directories
+	if (fs::exists(DataDirPath) && fs::exists(BlocksDirPath)) {
+		cout << "Blocks directory" << BlocksDirPath << " exists - Ok" << endl;
+	} else {
+		cout << "CREATING blocks directory" << endl;
+		fs::create_directories(BlocksDirPath);
 	}
 
-	cout << "CFGPATH: " << cfgPath << endl;
+	if (fs::exists(DataDirPath) && fs::exists(MetadataDirPath)) {
+		cout << "Metadata directory" << MetadataDirPath << " exists - Ok" << endl;
+	} else {
+		cout << "CREATING metadata directory" << endl;
+		fs::create_directories(MetadataDirPath);
+	}
+	if (fs::exists(DataDirPath) && fs::exists(WALDirPath)) {
+        cout << "WAL directory" << WALDirPath << " exists - Ok" << endl;
+	} else {
+		cout << "CREATING WAL directory" << endl;
+		fs::create_directories(WALDirPath);
+	}
+
+
+
+
+
+	//for (const auto& entry : fs::directory_iterator(dataDir)) {
+	//	if(isFileExists(entry, entry.status()));
+	//}
+
 
 
 	// Здесь проверяем остальное и стартуем
@@ -105,4 +134,5 @@ int main(int argc, char const* argv[]) {
 
 
 	return 0;
+
 }
