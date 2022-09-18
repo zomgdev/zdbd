@@ -3,9 +3,10 @@
 #include "fileutils.h"
 
 #include <iostream>
+#include <fstream>
 #include <arpa/inet.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <string>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <filesystem>
@@ -114,22 +115,41 @@ int main(int argc, char const* argv[]) {
 
 
 
+	FSImage ZDFS;// = new FSImage;
+
+	//ZDFS.FSImageVersion = 1;
+	//std::fill(&ZDFS.FilesRecords[0], &ZDFS.FilesRecords[1000000],0);
+	//ZDFS.FilesTotal = 10;
+	//ZDFS.TotalBlocks = 30;
+	//ZDFS.UnreplicatedBlocks = 0;
+
+	
+	cout << endl<<endl<<"Current ZDFS status:" << endl;
+	cout << "ZDFS total files: " << ZDFS.HeaderStruct.FilesTotal << endl;
+	cout << "ZDFS total files: " << ZDFS.HeaderStruct.TotalBlocks<< endl;
+	cout << "ZDFS total files: " << ZDFS.HeaderStruct.UnreplicatedBlocks << endl;
+	cout << endl;
+
+	cout << "Class size: " << sizeof(ZDFS.HeaderStruct) << endl << endl;
+	
 
 
-	//for (const auto& entry : fs::directory_iterator(dataDir)) {
-	//	if(isFileExists(entry, entry.status()));
-	//}
+	std::ofstream FSImageFile("./data/metadata/fsimage", std::ios_base::binary);
+
+	FSImageFile.write((char*)&ZDFS, sizeof(ZDFS));
+
+
+	fs::path TestFile{ "/home/fox/test.mkv" };
+
+	cout << "File size: " << fs::file_size(TestFile) << endl;
+	cout << endl;
 
 
 
-	// Здесь проверяем остальное и стартуем
-	// 1. Проверяем наличие файла с конфигом
-	// 2. А если есть параметры в командной строке, то переопределяем ими параметры из конфига
+
+	
 
 
-
-	// Старт DFS
-	DFSStartup(ZDFSConfig);
 
 
 

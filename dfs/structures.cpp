@@ -2,6 +2,17 @@
 #include <string>
 #include <iostream>
 
+// FSImage constructor
+FSImage::FSImage(void) {
+	HeaderStruct.FSImageVersion = 1;
+	HeaderStruct.FilesTotal = 65535;
+	HeaderStruct.TotalBlocks = 255;
+	HeaderStruct.UnreplicatedBlocks = 255;
+	
+	std::fill(&HeaderStruct.FilesRecords[0], &HeaderStruct.FilesRecords[ZDFS_MAX_FILES], 0);
+}
+
+
 // Конструктор для ZDFS
 ZDFS::ZDFS(void) {
 	ZDFS_BlockSize = DEFAULT_BLOCK_SIZE;
