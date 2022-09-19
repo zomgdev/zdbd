@@ -43,5 +43,5 @@
 
 // Базовые параметры файловой системы
 // Filesystem base parameters
-#define DEFAULT_BLOCK_SIZE   128*1024*1024;
-#define DEFAULT_STORAGE_SIZE 4*1024*1024*1024;
+#define DEFAULT_BLOCK_SIZE   64*1024*1024;      // bytes
+#define DEFAULT_STORAGE_SIZE 4*1024*1024*1024;  // bytes

@@ -10,11 +10,12 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <filesystem>
+#include <vector>
 
 #define DEBUG
 
 using namespace std;
-//namespace fs = std::filesystem;
+namespace fs = std::filesystem;
 
 
 // Алгоритм проверки настроек:
@@ -145,10 +146,28 @@ int main(int argc, char const* argv[]) {
 	cout << endl;
 
 
+	vector <FSImageFileRecord> ZDFSFiles;
 
+	//FSImageFileRecord ZDFSRecord = new(FSImageFileRecord);
+	//ZDFSRecord->FileSize = 1024 * 1024 * 1024;
+	//ZDFSRecord->FileName = "test_file001.txt";
 
+	cout << "Vector max_size: " << ZDFSFiles.max_size() << endl;
+	for (uint64_t id = 0; id < 10000000; ++id) {
+		ZDFSFiles.push_back(FSImageFileRecord());
+		ZDFSFiles[id].FileSize = 1024 * 1024 * 1024;
+		ZDFSFiles[id].FileName = "test_file."+to_string(id);
+//		cout << "id: " << id << " FileSize: " << ZDFSFiles[id].FileSize << " FileName: " << ZDFSFiles[id].FileName << " Sizeof: " << sizeof(ZDFSFiles) << endl;
+	}
+
+	uint64_t id;
+	cout << "Enter number: "; cin >> id;
 	
-
+	cout << "id: " << id << " FileSize: " << ZDFSFiles[id].FileSize << " FileName: " << ZDFSFiles[id].FileName << " Sizeof: " << sizeof(ZDFSFiles) << endl;
+	
+	cout << "Press enter..."; cin.ignore();
+	
+	
 
 
 
