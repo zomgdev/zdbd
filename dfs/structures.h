@@ -27,7 +27,11 @@ struct FSImageHeader{
 
 // File record
 struct FSImageFileRecord {
-	uint64_t FileSize;
+	uint16_t    SizeOf;
+	uint64_t    FileUID;
+	uint32_t    StorageUID;
+	uint64_t    FileSize;
+	uint8_t     FileReplicas;
 	std::string FileName;
 };
 

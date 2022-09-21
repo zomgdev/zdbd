@@ -11,6 +11,9 @@
 #include <unistd.h>
 #include <filesystem>
 #include <vector>
+#include <iterator>
+#include <algorithm>
+#include <random>
 
 #define DEBUG
 
@@ -148,17 +151,102 @@ int main(int argc, char const* argv[]) {
 
 	vector <FSImageFileRecord> ZDFSFiles;
 
-	//FSImageFileRecord ZDFSRecord = new(FSImageFileRecord);
-	//ZDFSRecord->FileSize = 1024 * 1024 * 1024;
-	//ZDFSRecord->FileName = "test_file001.txt";
+	
 
-	cout << "Vector max_size: " << ZDFSFiles.max_size() << endl;
-	for (uint64_t id = 0; id < 10000000; ++id) {
+	std::ofstream FSRecordsDataFile("./data/metadata/fsrecords.bin", std::ios_base::binary);
+
+	std::random_device rd;
+	std::uniform_int_distribution<int> rnd(1, 100);
+
+	uint64_t fuid = 0;
+	for (uint64_t id = 0; id < 1000000; ++id) {
+
+		++fuid;
+
+		// Сперва создаём слот в векторе, потом присваиваем его полям значения.
 		ZDFSFiles.push_back(FSImageFileRecord());
-		ZDFSFiles[id].FileSize = 1024 * 1024 * 1024;
-		ZDFSFiles[id].FileName = "test_file."+to_string(id);
-//		cout << "id: " << id << " FileSize: " << ZDFSFiles[id].FileSize << " FileName: " << ZDFSFiles[id].FileName << " Sizeof: " << sizeof(ZDFSFiles) << endl;
+		
+		ZDFSFiles[id].FileUID = fuid;
+		ZDFSFiles[id].StorageUID = 1;
+		ZDFSFiles[id].FileSize = rnd(rd) * 1024 * 1024 * 1024;
+		ZDFSFiles[id].FileReplicas = 3;
+		ZDFSFiles[id].FileName = "test_file." + to_string(id);
+		ZDFSFiles[id].SizeOf = \
+			sizeof(ZDFSFiles[id].SizeOf) + \
+			sizeof(ZDFSFiles[id].FileUID) + \
+			sizeof(ZDFSFiles[id].StorageUID) + \
+			sizeof(ZDFSFiles[id].FileSize) + \
+			sizeof(ZDFSFiles[id].FileReplicas) + \
+			ZDFSFiles[id].FileName.length() + 1;
+
+		// Записываем в файл
+		FSRecordsDataFile.write((char*)&ZDFSFiles[id].SizeOf,       sizeof(ZDFSFiles[id].SizeOf));
+		FSRecordsDataFile.write((char*)&ZDFSFiles[id].FileUID,      sizeof(ZDFSFiles[id].FileUID));
+		FSRecordsDataFile.write((char*)&ZDFSFiles[id].StorageUID,   sizeof(ZDFSFiles[id].StorageUID));
+		FSRecordsDataFile.write((char*)&ZDFSFiles[id].FileSize,     sizeof(ZDFSFiles[id].FileSize));
+		FSRecordsDataFile.write((char*)&ZDFSFiles[id].FileReplicas, sizeof(ZDFSFiles[id].FileReplicas));
+
+		FSRecordsDataFile.write((char*)ZDFSFiles[id].FileName.data(), ZDFSFiles[id].FileName.length() + 1);
+
+
+		//std::cout << "id: " << id << " FileSize: " << ZDFSFiles[id].FileSize << " FileName: " << ZDFSFiles[id].FileName << " Sizeof: " << sizeof(ZDFSFiles[id]) << endl;
+		
 	}
+
+
+	// read vector to test
+	vector <FSImageFileRecord> testVector{};
+	FSImageFileRecord tmpStr;
+
+	std::ifstream readTheVector("./data/metadata/fsrecords.bin", std::ios::in | std::ifstream::binary);
+
+	uint64_t vectNum = 0;
+	string tmpString;
+	
+	uint16_t FileRecWithoutStrSize = \
+		sizeof(tmpStr.SizeOf) + \
+		sizeof(tmpStr.FileUID) + \
+		sizeof(tmpStr.StorageUID) + \
+		sizeof(tmpStr.FileSize) + \
+		sizeof(tmpStr.FileReplicas);
+
+	//while ( !readTheVector.eof() ) {
+		
+	
+	//readTheVector.read((char*)&tmpStr, 36);
+		
+	testVector.push_back(tmpStr);
+	
+		readTheVector.read((char*)&testVector[vectNum].SizeOf, 2);
+		readTheVector.read((char*)&testVector[vectNum].FileUID, 8);
+		readTheVector.read((char*)&testVector[vectNum].StorageUID, 4);
+		readTheVector.read((char*)&testVector[vectNum].FileSize, 8);
+		readTheVector.read((char*)&testVector[vectNum].FileReplicas, 1);
+		readTheVector.read((char*)&tmpString, 12);
+
+			testVector[vectNum].FileName = tmpString;
+
+		//readTheVector.read((char*)testVector[vectNum].FileName, 12);
+
+
+		vectNum++;
+		std::cout << " SizeOf: " << testVector[0].SizeOf \
+			<< " FileUID: " << testVector[0].FileUID \
+			<< " StorageUID: " << testVector[0].StorageUID \
+			<< " FileSize: " << testVector[0].FileSize \
+			<< " FileReplicas: " << unsigned(testVector[0].FileReplicas) \ 
+			//<< endl << endl
+			<< " FileName: " << testVector[0].FileName << endl;
+		
+	//}
+
+
+	//std::istream& operator >>(std::istream & in, FSImageFileRecord & train)	{
+	//	return in >> train.departureStationId\
+	//		>> train.arrivalStationId\
+	//		>> train.departureTime\
+	//		>> train.arrivalTime;
+	//}
 
 	uint64_t id;
 	cout << "Enter number: "; cin >> id;
@@ -167,7 +255,9 @@ int main(int argc, char const* argv[]) {
 	
 	cout << "Press enter..."; cin.ignore();
 	
-	
+
+
+
 
 
 
