@@ -151,15 +151,15 @@ int main(int argc, char const* argv[]) {
 
 	vector <FSImageFileRecord> ZDFSFiles;
 
+	std::random_device rd;
+	std::uniform_int_distribution<int> rnd(1, 10);
 	
 
-	std::ofstream FSRecordsDataFile("./data/metadata/fsrecords.bin", std::ios_base::binary);
+	std::fstream FSRecordsDataFile("./data/metadata/fsrecords.bin", FSRecordsDataFile.binary | FSRecordsDataFile.in | FSRecordsDataFile.out | FSRecordsDataFile.trunc);
 
-	std::random_device rd;
-	std::uniform_int_distribution<int> rnd(1, 100);
 
 	uint64_t fuid = 0;
-	for (uint64_t id = 0; id < 1000000; ++id) {
+	for (uint64_t id = 0; id < 5000000; ++id) {
 
 		++fuid;
 
@@ -168,7 +168,7 @@ int main(int argc, char const* argv[]) {
 		
 		ZDFSFiles[id].FileUID = fuid;
 		ZDFSFiles[id].StorageUID = 1;
-		ZDFSFiles[id].FileSize = rnd(rd) * 1024 * 1024 * 1024;
+		ZDFSFiles[id].FileSize = (uint64_t)rnd(rd) * 1024 * 1024 * 1024;
 		ZDFSFiles[id].FileReplicas = 3;
 		ZDFSFiles[id].FileName = "test_file." + to_string(id);
 		ZDFSFiles[id].SizeOf = \
@@ -180,17 +180,15 @@ int main(int argc, char const* argv[]) {
 			ZDFSFiles[id].FileName.length() + 1;
 
 		// Записываем в файл
-		FSRecordsDataFile.write((char*)&ZDFSFiles[id].SizeOf,       sizeof(ZDFSFiles[id].SizeOf));
-		FSRecordsDataFile.write((char*)&ZDFSFiles[id].FileUID,      sizeof(ZDFSFiles[id].FileUID));
-		FSRecordsDataFile.write((char*)&ZDFSFiles[id].StorageUID,   sizeof(ZDFSFiles[id].StorageUID));
-		FSRecordsDataFile.write((char*)&ZDFSFiles[id].FileSize,     sizeof(ZDFSFiles[id].FileSize));
-		FSRecordsDataFile.write((char*)&ZDFSFiles[id].FileReplicas, sizeof(ZDFSFiles[id].FileReplicas));
+		// FSRecordsDataFile.write(reinterpret_cast<char*>(&strct01.SizeOf), sizeof(strct01.SizeOf));
 
-		FSRecordsDataFile.write((char*)ZDFSFiles[id].FileName.data(), ZDFSFiles[id].FileName.length() + 1);
+		FSRecordsDataFile.write(reinterpret_cast<char*>(&ZDFSFiles[id].SizeOf),       sizeof(ZDFSFiles[id].SizeOf));
+		FSRecordsDataFile.write(reinterpret_cast<char*>(&ZDFSFiles[id].FileUID),      sizeof(ZDFSFiles[id].FileUID));
+		FSRecordsDataFile.write(reinterpret_cast<char*>(&ZDFSFiles[id].StorageUID),   sizeof(ZDFSFiles[id].StorageUID));
+		FSRecordsDataFile.write(reinterpret_cast<char*>(&ZDFSFiles[id].FileSize),     sizeof(ZDFSFiles[id].FileSize));
+		FSRecordsDataFile.write(reinterpret_cast<char*>(&ZDFSFiles[id].FileReplicas), sizeof(ZDFSFiles[id].FileReplicas));
 
-
-		//std::cout << "id: " << id << " FileSize: " << ZDFSFiles[id].FileSize << " FileName: " << ZDFSFiles[id].FileName << " Sizeof: " << sizeof(ZDFSFiles[id]) << endl;
-		
+		FSRecordsDataFile.write(reinterpret_cast<char*>(ZDFSFiles[id].FileName.data()), ZDFSFiles[id].FileName.length() + 1);
 	}
 
 
@@ -198,70 +196,71 @@ int main(int argc, char const* argv[]) {
 	vector <FSImageFileRecord> testVector{};
 	FSImageFileRecord tmpStr;
 
-	std::ifstream readTheVector("./data/metadata/fsrecords.bin", std::ios::in | std::ifstream::binary);
-
+	
 	uint64_t vectNum = 0;
+	uint64_t CurrentFilePos = 0;
+
 	string tmpString;
 	
 	uint16_t FileRecWithoutStrSize = \
-		sizeof(tmpStr.SizeOf) + \
-		sizeof(tmpStr.FileUID) + \
-		sizeof(tmpStr.StorageUID) + \
-		sizeof(tmpStr.FileSize) + \
-		sizeof(tmpStr.FileReplicas);
-
-	//while ( !readTheVector.eof() ) {
-		
+		sizeof(tmpStr.SizeOf) + sizeof(tmpStr.FileUID) + sizeof(tmpStr.StorageUID) + \
+		sizeof(tmpStr.FileSize) + sizeof(tmpStr.FileReplicas);
 	
-	//readTheVector.read((char*)&tmpStr, 36);
-		
-	testVector.push_back(tmpStr);
 	
-		readTheVector.read((char*)&testVector[vectNum].SizeOf, 2);
-		readTheVector.read((char*)&testVector[vectNum].FileUID, 8);
-		readTheVector.read((char*)&testVector[vectNum].StorageUID, 4);
-		readTheVector.read((char*)&testVector[vectNum].FileSize, 8);
-		readTheVector.read((char*)&testVector[vectNum].FileReplicas, 1);
-		readTheVector.read((char*)&tmpString, 12);
-
-			testVector[vectNum].FileName = tmpString;
-
-		//readTheVector.read((char*)testVector[vectNum].FileName, 12);
+	FSRecordsDataFile.seekp(CurrentFilePos);
+	
+	while (!FSRecordsDataFile.eof()) {
 
 
+		//cout << "Current file position: " << FSRecordsDataFile.tellg() << endl;
+
+		//FSRecordsDataFile.read(reinterpret_cast<char*>(&testVector[vectNum].SizeOf), 2);
+		//FSRecordsDataFile.read(reinterpret_cast<char*>(&testVector[vectNum].FileUID), sizeof(tmpStr.FileUID));
+		//FSRecordsDataFile.read(reinterpret_cast<char*>(&testVector[vectNum].StorageUID), sizeof(tmpStr.StorageUID));
+		//FSRecordsDataFile.read(reinterpret_cast<char*>(&testVector[vectNum].FileSize), sizeof(tmpStr.FileSize));
+		//FSRecordsDataFile.read(reinterpret_cast<char*>(&testVector[vectNum].FileReplicas), sizeof(tmpStr.FileReplicas));
+
+
+		FSRecordsDataFile.read(reinterpret_cast<char*>(&tmpStr.SizeOf), sizeof(tmpStr.SizeOf));
+		FSRecordsDataFile.read(reinterpret_cast<char*>(&tmpStr.FileUID), sizeof(tmpStr.FileUID));
+		FSRecordsDataFile.read(reinterpret_cast<char*>(&tmpStr.StorageUID), sizeof(tmpStr.StorageUID));
+		FSRecordsDataFile.read(reinterpret_cast<char*>(&tmpStr.FileSize), sizeof(tmpStr.FileSize));
+		FSRecordsDataFile.read(reinterpret_cast<char*>(&tmpStr.FileReplicas), sizeof(tmpStr.FileReplicas));
+		testVector.push_back(tmpStr);
+
+
+		char* strtmpbuf = new char[testVector[vectNum].SizeOf - FileRecWithoutStrSize];
+
+		FSRecordsDataFile.read(reinterpret_cast<char*>(strtmpbuf), testVector[vectNum].SizeOf-FileRecWithoutStrSize);
+
+		testVector[vectNum].FileName = strtmpbuf;
+
+
+		// Debug through the cout rules!!! :D
+
+		//cout << "Struct size without string: " << FileRecWithoutStrSize << endl;
+		//cout << "String size: " << tmpStr.SizeOf - FileRecWithoutStrSize << endl;
+		/*
+		std::cout \
+			<< " SizeOf: " << testVector[vectNum].SizeOf \
+			<< " FileUID: " << testVector[vectNum].FileUID \
+			<< " StorageUID: " << testVector[vectNum].StorageUID \
+			<< " FileSize: " << tmpStr.FileSize \
+			<< " FileReplicas: " << unsigned(testVector[vectNum].FileReplicas) \
+			//<< endl << endl;
+			<< " FileName: " << testVector[vectNum].FileName << endl;
+			*/
 		vectNum++;
-		std::cout << " SizeOf: " << testVector[0].SizeOf \
-			<< " FileUID: " << testVector[0].FileUID \
-			<< " StorageUID: " << testVector[0].StorageUID \
-			<< " FileSize: " << testVector[0].FileSize \
-			<< " FileReplicas: " << unsigned(testVector[0].FileReplicas) \ 
-			//<< endl << endl
-			<< " FileName: " << testVector[0].FileName << endl;
-		
-	//}
-
-
-	//std::istream& operator >>(std::istream & in, FSImageFileRecord & train)	{
-	//	return in >> train.departureStationId\
-	//		>> train.arrivalStationId\
-	//		>> train.departureTime\
-	//		>> train.arrivalTime;
-	//}
+	}
 
 	uint64_t id;
 	cout << "Enter number: "; cin >> id;
 	
 	cout << "id: " << id << " FileSize: " << ZDFSFiles[id].FileSize << " FileName: " << ZDFSFiles[id].FileName << " Sizeof: " << sizeof(ZDFSFiles) << endl;
+	cout << "Press enter..."; 
+	std::cin.ignore();
 	
-	cout << "Press enter..."; cin.ignore();
-	
-
-
-
-
-
 
 
 	return 0;
-
 }
