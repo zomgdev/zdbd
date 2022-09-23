@@ -157,9 +157,9 @@ int main(int argc, char const* argv[]) {
 
 	std::fstream FSRecordsDataFile("./data/metadata/fsrecords.bin", FSRecordsDataFile.binary | FSRecordsDataFile.in | FSRecordsDataFile.out | FSRecordsDataFile.trunc);
 
-
+	//
 	uint64_t fuid = 0;
-	for (uint64_t id = 0; id < 5000000; ++id) {
+	for (uint64_t id = 0; id < 1000000; ++id) {
 
 		++fuid;
 
@@ -190,7 +190,7 @@ int main(int argc, char const* argv[]) {
 
 		FSRecordsDataFile.write(reinterpret_cast<char*>(ZDFSFiles[id].FileName.data()), ZDFSFiles[id].FileName.length() + 1);
 	}
-
+	ZDFSFiles.clear();
 
 	// read vector to test
 	vector <FSImageFileRecord> testVector{};
@@ -213,13 +213,6 @@ int main(int argc, char const* argv[]) {
 
 
 		//cout << "Current file position: " << FSRecordsDataFile.tellg() << endl;
-
-		//FSRecordsDataFile.read(reinterpret_cast<char*>(&testVector[vectNum].SizeOf), 2);
-		//FSRecordsDataFile.read(reinterpret_cast<char*>(&testVector[vectNum].FileUID), sizeof(tmpStr.FileUID));
-		//FSRecordsDataFile.read(reinterpret_cast<char*>(&testVector[vectNum].StorageUID), sizeof(tmpStr.StorageUID));
-		//FSRecordsDataFile.read(reinterpret_cast<char*>(&testVector[vectNum].FileSize), sizeof(tmpStr.FileSize));
-		//FSRecordsDataFile.read(reinterpret_cast<char*>(&testVector[vectNum].FileReplicas), sizeof(tmpStr.FileReplicas));
-
 
 		FSRecordsDataFile.read(reinterpret_cast<char*>(&tmpStr.SizeOf), sizeof(tmpStr.SizeOf));
 		FSRecordsDataFile.read(reinterpret_cast<char*>(&tmpStr.FileUID), sizeof(tmpStr.FileUID));
