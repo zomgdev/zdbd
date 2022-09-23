@@ -23,6 +23,8 @@ int main()
     fs::remove_all(sandbox);
 }
 */
+
+// Функция для проверки наличия файла внутри ZDFS
 bool isFileExists(const fs::path& p, fs::file_status s = fs::file_status{}) {
 	bool fileExist = false;
     
