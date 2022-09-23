@@ -121,13 +121,6 @@ int main(int argc, char const* argv[]) {
 
 	FSImage ZDFS;// = new FSImage;
 
-	//ZDFS.FSImageVersion = 1;
-	//std::fill(&ZDFS.FilesRecords[0], &ZDFS.FilesRecords[1000000],0);
-	//ZDFS.FilesTotal = 10;
-	//ZDFS.TotalBlocks = 30;
-	//ZDFS.UnreplicatedBlocks = 0;
-
-	
 	cout << endl<<endl<<"Current ZDFS status:" << endl;
 	cout << "ZDFS total files: " << ZDFS.HeaderStruct.FilesTotal << endl;
 	cout << "ZDFS total files: " << ZDFS.HeaderStruct.TotalBlocks<< endl;
