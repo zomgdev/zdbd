@@ -1,7 +1,3 @@
-#include "dfs.h"
-#include "structures.h"
-#include "fileutils.h"
-
 #include <iostream>
 #include <fstream>
 #include <arpa/inet.h>
@@ -14,6 +10,11 @@
 #include <iterator>
 #include <algorithm>
 #include <random>
+
+#include "dfs.h"
+#include "structures.h"
+#include "fileutils.h"
+#include "metadata.h"
 
 #define DEBUG
 
@@ -91,58 +92,29 @@ int main(int argc, char const* argv[]) {
 	cout << "CFGPATH: " << cfgPath << endl;
 
 	//dataPath, metadataPath
-	fs::path DataDirPath     { DFSdaemon->ZDFS_RootDirPath };
-	fs::path BlocksDirPath   { DFSdaemon->ZDFS_BlocksDirPath };
-	fs::path MetadataDirPath { DFSdaemon->ZDFS_MetadataDirPath };
-	fs::path WALDirPath      { DFSdaemon->ZDFS_WALDirPath };
+//	fs::path DataDirPath     { DFSdaemon->ZDFS_RootDirPath };
+//	fs::path MetadataDirPath { DFSdaemon->ZDFS_MetadataDirPath };
+//	fs::path BlocksDirPath   { DFSdaemon->ZDFS_BlocksDirPath };
+//	fs::path WALDirPath      { DFSdaemon->ZDFS_WALDirPath };
 	
-	// Checking directories
-	if (fs::exists(DataDirPath) && fs::exists(BlocksDirPath)) {
-		cout << "Blocks directory" << BlocksDirPath << " exists - Ok" << endl;
-	} else {
-		cout << "CREATING blocks directory" << endl;
-		fs::create_directories(BlocksDirPath);
-	}
+	//// Checking directories
+	//if (fs::exists(DataDirPath) && fs::exists(BlocksDirPath)) {
+	//	cout << "Blocks directory" << BlocksDirPath << " exists - Ok" << endl;
+	//} else {
+	//	cout << "CREATING blocks directory" << endl;
+	//	fs::create_directories(BlocksDirPath);
+	//}
 
-	if (fs::exists(DataDirPath) && fs::exists(MetadataDirPath)) {
-		cout << "Metadata directory" << MetadataDirPath << " exists - Ok" << endl;
-	} else {
-		cout << "CREATING metadata directory" << endl;
-		fs::create_directories(MetadataDirPath);
-	}
-	if (fs::exists(DataDirPath) && fs::exists(WALDirPath)) {
-        cout << "WAL directory" << WALDirPath << " exists - Ok" << endl;
-	} else {
-		cout << "CREATING WAL directory" << endl;
-		fs::create_directories(WALDirPath);
-	}
+	//if (fs::exists(DataDirPath) && fs::exists(WALDirPath)) {
+    //    cout << "WAL directory" << WALDirPath << " exists - Ok" << endl;
+	//} else {
+	//	cout << "CREATING WAL directory" << endl;
+	//	fs::create_directories(WALDirPath);
+	//}
 
 
 
-	FSImage ZDFS;// = new FSImage;
-
-	cout << endl<<endl<<"Current ZDFS status:" << endl;
-	cout << "ZDFS total files: " << ZDFS.HeaderStruct.FilesTotal << endl;
-	cout << "ZDFS total files: " << ZDFS.HeaderStruct.TotalBlocks<< endl;
-	cout << "ZDFS total files: " << ZDFS.HeaderStruct.UnreplicatedBlocks << endl;
-	cout << endl;
-
-	cout << "Class size: " << sizeof(ZDFS.HeaderStruct) << endl << endl;
-	
-
-
-	std::ofstream FSImageFile("./data/metadata/fsimage", std::ios_base::binary);
-
-	FSImageFile.write((char*)&ZDFS, sizeof(ZDFS));
-
-
-	fs::path TestFile{ "/home/fox/test.mkv" };
-
-	cout << "File size: " << fs::file_size(TestFile) << endl;
-	cout << endl;
-
-
-	vector <FSImageFileRecord> ZDFSFiles;
+	vector <ZDFSImageFileRecord> ZDFSFiles;
 
 	std::random_device rd;
 	std::uniform_int_distribution<int> rnd(1, 10);
@@ -157,7 +129,7 @@ int main(int argc, char const* argv[]) {
 		++fuid;
 
 		// Сперва создаём слот в векторе, потом присваиваем его полям значения.
-		ZDFSFiles.push_back(FSImageFileRecord());
+		ZDFSFiles.push_back(ZDFSImageFileRecord());
 		
 		ZDFSFiles[id].FileUID = fuid;
 		ZDFSFiles[id].StorageUID = 1;
@@ -185,64 +157,6 @@ int main(int argc, char const* argv[]) {
 	}
 	ZDFSFiles.clear();
 
-	// read vector to test
-	vector <FSImageFileRecord> testVector{};
-	FSImageFileRecord tmpStr;
-
-	
-	uint64_t vectNum = 0;
-	uint64_t CurrentFilePos = 0;
-
-	string tmpString;
-	
-	uint16_t FileRecWithoutStrSize = \
-		sizeof(tmpStr.SizeOf) + sizeof(tmpStr.FileUID) + sizeof(tmpStr.StorageUID) + \
-		sizeof(tmpStr.FileSize) + sizeof(tmpStr.FileReplicas);
-	
-	
-	FSRecordsDataFile.seekp(CurrentFilePos);
-	
-	while (!FSRecordsDataFile.eof()) {
-
-
-		//cout << "Current file position: " << FSRecordsDataFile.tellg() << endl;
-
-		FSRecordsDataFile.read(reinterpret_cast<char*>(&tmpStr.SizeOf), sizeof(tmpStr.SizeOf));
-		FSRecordsDataFile.read(reinterpret_cast<char*>(&tmpStr.FileUID), sizeof(tmpStr.FileUID));
-		FSRecordsDataFile.read(reinterpret_cast<char*>(&tmpStr.StorageUID), sizeof(tmpStr.StorageUID));
-		FSRecordsDataFile.read(reinterpret_cast<char*>(&tmpStr.FileSize), sizeof(tmpStr.FileSize));
-		FSRecordsDataFile.read(reinterpret_cast<char*>(&tmpStr.FileReplicas), sizeof(tmpStr.FileReplicas));
-		testVector.push_back(tmpStr);
-
-
-		char* strtmpbuf = new char[testVector[vectNum].SizeOf - FileRecWithoutStrSize];
-
-		FSRecordsDataFile.read(reinterpret_cast<char*>(strtmpbuf), testVector[vectNum].SizeOf-FileRecWithoutStrSize);
-
-		testVector[vectNum].FileName = strtmpbuf;
-
-
-		// Debug through the cout rules!!! :D
-
-		//cout << "Struct size without string: " << FileRecWithoutStrSize << endl;
-		//cout << "String size: " << tmpStr.SizeOf - FileRecWithoutStrSize << endl;
-		/*
-		std::cout \
-			<< " SizeOf: " << testVector[vectNum].SizeOf \
-			<< " FileUID: " << testVector[vectNum].FileUID \
-			<< " StorageUID: " << testVector[vectNum].StorageUID \
-			<< " FileSize: " << tmpStr.FileSize \
-			<< " FileReplicas: " << unsigned(testVector[vectNum].FileReplicas) \
-			//<< endl << endl;
-			<< " FileName: " << testVector[vectNum].FileName << endl;
-			*/
-		vectNum++;
-	}
-
-	uint64_t id;
-	cout << "Enter number: "; cin >> id;
-	
-	cout << "id: " << id << " FileSize: " << ZDFSFiles[id].FileSize << " FileName: " << ZDFSFiles[id].FileName << " Sizeof: " << sizeof(ZDFSFiles) << endl;
 	cout << "Press enter..."; 
 	std::cin.ignore();
 	

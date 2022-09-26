@@ -1,6 +1,13 @@
 #pragma once
 
 #include <string>
+#include <iostream>
+#include <fstream>
+#include <filesystem>
+
+#include "structures.h"
+
+namespace fs = std::filesystem;
 
 
 // FSImage format structures
@@ -15,7 +22,7 @@ struct FSImageHeader {
 };
 
 // File record
-struct FSImageFileRecord {
+struct ZDFSImageFileRecord {
 	uint16_t    SizeOf;
 	uint64_t    FileUID;
 	uint32_t    StorageUID;
@@ -24,7 +31,7 @@ struct FSImageFileRecord {
 	std::string FileName;
 };
 struct FilesPermissions{}{
-
+	uint64_t FileUID;
 };
 
 
@@ -35,3 +42,13 @@ private:
 
 };
 
+class ZDFSMetaData {
+private:
+	fs::path DataDirPath;
+	fs::path MetadataDirPath;
+
+public:
+	void StartupChecking(ZDFSDaemon *zdfsd);
+	bool LoadFSImage(ZDFSDaemon zdfsd);
+	ZDFSMetaData();
+};
