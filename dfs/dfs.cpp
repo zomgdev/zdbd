@@ -1,15 +1,18 @@
 #include <iostream>
 #include <fstream>
-#include <arpa/inet.h>
-#include <cstdio>
-#include <string>
-#include <sys/socket.h>
-#include <unistd.h>
 #include <filesystem>
+//#include <cstdint>
+#include <string>
 #include <vector>
-#include <iterator>
-#include <algorithm>
+#include <map>
 #include <random>
+
+//#include <cstdio>
+//#include <sys/socket.h>
+//#include <arpa/inet.h>
+//#include <unistd.h>
+//#include <iterator>
+//#include <algorithm>
 
 #include "dfs.h"
 #include "structures.h"
@@ -34,7 +37,7 @@ namespace fs = std::filesystem;
 
 char* checkConfig() {
 
-	char* CfgName;
+	char* CfgName=0;
 	cout << "ЗАГЛУШКА: checkConfig " << endl;
 	return CfgName;
 }
@@ -42,7 +45,7 @@ char* checkConfig() {
 // Если есть, считываем и заполняем ими класс . Возвращаем ссылку на настройки.
 // Формат, пока - JSON.
 ZDFS* ParseConfig() {
-	ZDFS* ParsedCFG;
+	ZDFS* ParsedCFG=0;
 
 	return ParsedCFG;
 }
@@ -53,7 +56,7 @@ static int DFSStartup(ZDFS *inCfg) {
 }
 
 static char* CheckDirectoryStructure(char *path) {
-	char* DataDirPath;
+	char* DataDirPath = 0;
 
 	return DataDirPath;
 }
@@ -114,48 +117,32 @@ int main(int argc, char const* argv[]) {
 
 
 
-	vector <ZDFSImageFileRecord> ZDFSFiles;
-
-	std::random_device rd;
-	std::uniform_int_distribution<int> rnd(1, 10);
+	string strCommand;
+	map<string, uint16_t> todo{ { "bye",100}, { "make demo",1}, {"read meta", 2} };
 	
+	while (true) {
+		cout << "DFS shell > ";
+		getline(cin, strCommand);
 
-	std::fstream FSRecordsDataFile("./data/metadata/fsrecords.bin", FSRecordsDataFile.binary | FSRecordsDataFile.in | FSRecordsDataFile.out | FSRecordsDataFile.trunc);
-
-	//
-	uint64_t fuid = 0;
-	for (uint64_t id = 0; id < 1000000; ++id) {
-
-		++fuid;
-
-		// Сперва создаём слот в векторе, потом присваиваем его полям значения.
-		ZDFSFiles.push_back(ZDFSImageFileRecord());
 		
-		ZDFSFiles[id].FileUID = fuid;
-		ZDFSFiles[id].StorageUID = 1;
-		ZDFSFiles[id].FileSize = (uint64_t)rnd(rd) * 1024 * 1024 * 1024;
-		ZDFSFiles[id].FileReplicas = 3;
-		ZDFSFiles[id].FileName = "test_file." + to_string(id);
-		ZDFSFiles[id].SizeOf = \
-			sizeof(ZDFSFiles[id].SizeOf) + \
-			sizeof(ZDFSFiles[id].FileUID) + \
-			sizeof(ZDFSFiles[id].StorageUID) + \
-			sizeof(ZDFSFiles[id].FileSize) + \
-			sizeof(ZDFSFiles[id].FileReplicas) + \
-			ZDFSFiles[id].FileName.length() + 1;
+		switch (todo[strCommand]) {
+		
+		case 100:
+			cout << "Have a nice day!" << endl;
+			return 0;
 
-		// Записываем в файл
-		// FSRecordsDataFile.write(reinterpret_cast<char*>(&strct01.SizeOf), sizeof(strct01.SizeOf));
+		case 1: 
+			cout << "Create demo metadata storage" << endl;
+			break;
 
-		FSRecordsDataFile.write(reinterpret_cast<char*>(&ZDFSFiles[id].SizeOf),       sizeof(ZDFSFiles[id].SizeOf));
-		FSRecordsDataFile.write(reinterpret_cast<char*>(&ZDFSFiles[id].FileUID),      sizeof(ZDFSFiles[id].FileUID));
-		FSRecordsDataFile.write(reinterpret_cast<char*>(&ZDFSFiles[id].StorageUID),   sizeof(ZDFSFiles[id].StorageUID));
-		FSRecordsDataFile.write(reinterpret_cast<char*>(&ZDFSFiles[id].FileSize),     sizeof(ZDFSFiles[id].FileSize));
-		FSRecordsDataFile.write(reinterpret_cast<char*>(&ZDFSFiles[id].FileReplicas), sizeof(ZDFSFiles[id].FileReplicas));
+		case 2: 
+			cout << "Read metadata " << endl;
+			break;
 
-		FSRecordsDataFile.write(reinterpret_cast<char*>(ZDFSFiles[id].FileName.data()), ZDFSFiles[id].FileName.length() + 1);
+		default:
+			break;
+		}
 	}
-	ZDFSFiles.clear();
 
 	cout << "Press enter..."; 
 	std::cin.ignore();

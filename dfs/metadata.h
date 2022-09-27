@@ -30,7 +30,7 @@ struct ZDFSImageFileRecord {
 	uint8_t     FileReplicas;
 	std::string FileName;
 };
-struct FilesPermissions{}{
+struct FilesPermissions{
 	uint64_t FileUID;
 };
 
@@ -46,8 +46,10 @@ class ZDFSMetaData {
 private:
 	fs::path DataDirPath;
 	fs::path MetadataDirPath;
+	FSImageHeader HeaderStruct{};
 
 public:
+	void GenerateTestMeta(ZDFSDaemon* zdfsd);
 	void StartupChecking(ZDFSDaemon *zdfsd);
 	bool LoadFSImage(ZDFSDaemon zdfsd);
 	ZDFSMetaData();

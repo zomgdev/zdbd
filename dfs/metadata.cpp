@@ -1,5 +1,15 @@
+#include <iostream>
+#include <fstream>
+#include <filesystem>
+#include <vector>
+#include <random>
 
 #include "metadata.h"
+
+using namespace std;
+
+// FSImage constructor
+
 
 void ZDFSMetaData::StartupChecking(ZDFSDaemon *zdfsd) {
 	
@@ -14,14 +24,24 @@ void ZDFSMetaData::StartupChecking(ZDFSDaemon *zdfsd) {
 		fs::create_directories(MetadataDirPath);
 	}
 };
-ZDFSMetaData::ZDFSMetaData() {
 
+ZDFSMetaData::ZDFSMetaData() {
+	// ZDFS Metadata constructor
+	// fill the structure by test data for a while
+	HeaderStruct.FSImageVersion = 1;
+	HeaderStruct.FilesTotal = 65535;
+	HeaderStruct.TotalBlocks = 255;
+	HeaderStruct.UnreplicatedBlocks = 255;
+
+	std::fill(&HeaderStruct.FilesRecords[0], &HeaderStruct.FilesRecords[ZDFS_MAX_FILES], 0);
 };
 
-ZDFSMetaData::LoadFSImage() {
+bool ZDFSMetaData::LoadFSImage(ZDFSDaemon zfdfsd) {
 	// read vector to test
 	vector <ZDFSImageFileRecord> testVector{};
 	ZDFSImageFileRecord tmpStr;
+	
+	std::fstream FSRecordsDataFile("./data/metadata/fsrecords.bin", FSRecordsDataFile.binary | FSRecordsDataFile.in | FSRecordsDataFile.out | FSRecordsDataFile.trunc);
 
 
 	uint64_t vectNum = 0;
@@ -71,10 +91,57 @@ ZDFSMetaData::LoadFSImage() {
 			<< " FileName: " << testVector[vectNum].FileName << endl;
 			*/
 		vectNum++;
+
 	}
 
-	uint64_t id;
-	cout << "Enter number: "; cin >> id;
+	// todo: разобраться, нужен ли здесь такой тест.
+	//uint64_t id;
+	//cout << "Enter number: "; cin >> id;
+	//cout << "id: " << id << " FileSize: " << ZDFSFiles[id].FileSize << " FileName: " << ZDFSFiles[id].FileName << " Sizeof: " << sizeof(ZDFSFiles) << endl;
+	return true;
+}
+// Test metadata generator ;)
+void GenerateTestMeta(ZDFSDaemon* zdfsd) {
+	
+	std::fstream FSRecordsDataFile("./data/metadata/fsrecords.bin", FSRecordsDataFile.binary | FSRecordsDataFile.in | FSRecordsDataFile.out | FSRecordsDataFile.trunc);
+	vector <ZDFSImageFileRecord> ZDFSFiles;
 
-	cout << "id: " << id << " FileSize: " << ZDFSFiles[id].FileSize << " FileName: " << ZDFSFiles[id].FileName << " Sizeof: " << sizeof(ZDFSFiles) << endl;
+	std::random_device rd;
+	std::uniform_int_distribution<int> rnd(1, 10);
+
+	//
+	uint64_t fuid = 0;
+	for (uint64_t id = 0; id < 1000000; ++id) {
+
+		++fuid;
+
+		// Сперва создаём слот в векторе, потом присваиваем его полям значения.
+		ZDFSFiles.push_back(ZDFSImageFileRecord());
+
+		ZDFSFiles[id].FileUID = fuid;
+		ZDFSFiles[id].StorageUID = 1;
+		ZDFSFiles[id].FileSize = (uint64_t)rnd(rd) * 1024 * 1024 * 1024;
+		ZDFSFiles[id].FileReplicas = 3;
+		ZDFSFiles[id].FileName = "test_file." + to_string(id);
+		ZDFSFiles[id].SizeOf = \
+			sizeof(ZDFSFiles[id].SizeOf) + \
+			sizeof(ZDFSFiles[id].FileUID) + \
+			sizeof(ZDFSFiles[id].StorageUID) + \
+			sizeof(ZDFSFiles[id].FileSize) + \
+			sizeof(ZDFSFiles[id	].FileReplicas) + \
+			ZDFSFiles[id].FileName.length() + 1;
+
+		// Записываем в файл
+		// FSRecordsDataFile.write(reinterpret_cast<char*>(&strct01.SizeOf), sizeof(strct01.SizeOf));
+
+		FSRecordsDataFile.write(reinterpret_cast<char*>(&ZDFSFiles[id].SizeOf), sizeof(ZDFSFiles[id].SizeOf));
+		FSRecordsDataFile.write(reinterpret_cast<char*>(&ZDFSFiles[id].FileUID), sizeof(ZDFSFiles[id].FileUID));
+		FSRecordsDataFile.write(reinterpret_cast<char*>(&ZDFSFiles[id].StorageUID), sizeof(ZDFSFiles[id].StorageUID));
+		FSRecordsDataFile.write(reinterpret_cast<char*>(&ZDFSFiles[id].FileSize), sizeof(ZDFSFiles[id].FileSize));
+		FSRecordsDataFile.write(reinterpret_cast<char*>(&ZDFSFiles[id].FileReplicas), sizeof(ZDFSFiles[id].FileReplicas));
+
+		FSRecordsDataFile.write(reinterpret_cast<char*>(ZDFSFiles[id].FileName.data()), ZDFSFiles[id].FileName.length() + 1);
+	}
+	ZDFSFiles.clear();
+
 }
