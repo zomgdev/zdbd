@@ -136,7 +136,11 @@ int main(int argc, char const* argv[]) {
 			break;
 
 		case 2: 
+		{
 			cout << "Read metadata " << endl;
+			ZDFSMetaData* ZDFSMeta = new ZDFSMetaData;
+			ZDFSMeta->LoadFSImage(*DFSdaemon);
+		}
 			break;
 
 		default:
