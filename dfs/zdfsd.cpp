@@ -1,65 +1,103 @@
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <algorithm>
+#include <set>
+using namespace std;
 
-
-#define PORT 22020
-int main(int argc, char const* argv[])
+int main()
 {
-	int server_fd, new_socket, valread;
-	struct sockaddr_in address;
-	int opt = 1;
-	int addrlen = sizeof(address);
-	char buffer[1024] = { 0 };
-	char* hello = "Hello from server";
+    int listener;
+    struct sockaddr_in addr;
+    char buf[1024];
+    int bytes_read;
 
-	// Creating socket file descriptor
-	if ((server_fd = socket(AF_INET, SOCK_STREAM, 0))
-		== 0) {
-		perror("socket failed");
-		exit(EXIT_FAILURE);
-	}
+    listener = socket(AF_INET, SOCK_STREAM, 0);
+    if (listener < 0)
+    {
+        perror("socket");
+        exit(1);
+    }
 
-	// Forcefully attaching socket to the port 8080
-	if (setsockopt(server_fd, SOL_SOCKET,
-		SO_REUSEADDR | SO_REUSEPORT, &opt,
-		sizeof(opt))) {
-		perror("setsockopt");
-		exit(EXIT_FAILURE);
-	}
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(PORT);
+    fcntl(listener, F_SETFL, O_NONBLOCK);
 
-	// Forcefully attaching socket to the port 8080
-	if (bind(server_fd, (struct sockaddr*)&address,
-		sizeof(address))
-		< 0) {
-		perror("bind failed");
-		exit(EXIT_FAILURE);
-	}
-	if (listen(server_fd, 3) < 0) {
-		perror("listen");
-		exit(EXIT_FAILURE);
-	}
-	if ((new_socket
-		= accept(server_fd, (struct sockaddr*)&address,
-			(socklen_t*)&addrlen))
-		< 0) {
-		perror("accept");
-		exit(EXIT_FAILURE);
-	}
-	valread = read(new_socket, buffer, 1024);
-	printf("%s\n", buffer);
-	send(new_socket, hello, strlen(hello), 0);
-	printf("Hello message sent\n");
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(3425);
+    addr.sin_addr.s_addr = INADDR_ANY;
+    if (bind(listener, (struct sockaddr*)&addr, sizeof(addr)) < 0)
+    {
+        perror("bind");
+        exit(2);
+    }
 
-	// closing the connected socket
-	close(new_socket);
-	// closing the listening socket
-	shutdown(server_fd, SHUT_RDWR);
-	return 0;
+    listen(listener, 2);
+
+    set<int> clients;
+    clients.clear();
+
+    while (1)
+    {
+        // Заполняем множество сокетов
+        fd_set readset;
+        FD_ZERO(&readset);
+        FD_SET(listener, &readset);
+
+        for (set<int>::iterator it = clients.begin(); it != clients.end(); it++)
+            FD_SET(*it, &readset);
+
+        // Задаём таймаут
+        timeval timeout;
+        timeout.tv_sec = 15;
+        timeout.tv_usec = 0;
+
+        // Ждём события в одном из сокетов
+        int mx = max(listener, *max_element(clients.begin(), clients.end()));
+        if (select(mx + 1, &readset, NULL, NULL, &timeout) <= 0)
+        {
+            perror("select");
+            exit(3);
+        }
+
+        // Определяем тип события и выполняем соответствующие действия
+        if (FD_ISSET(listener, &readset))
+        {
+            // Поступил новый запрос на соединение, используем accept
+            int sock = accept(listener, NULL, NULL);
+            if (sock < 0)
+            {
+                perror("accept");
+                exit(3);
+            }
+
+            fcntl(sock, F_SETFL, O_NONBLOCK);
+
+            clients.insert(sock);
+        }
+
+        for (set<int>::iterator it = clients.begin(); it != clients.end(); it++)
+        {
+            if (FD_ISSET(*it, &readset))
+            {
+                // Поступили данные от клиента, читаем их
+                bytes_read = recv(*it, buf, 1024, 0);
+
+                if (bytes_read <= 0)
+                {
+                    // Соединение разорвано, удаляем сокет из множества
+                    close(*it);
+                    clients.erase(*it);
+                    continue;
+                }
+
+                // Отправляем данные обратно клиенту
+                send(*it, buf, bytes_read, 0);
+            }
+        }
+    }
+
+    return 0;
 }
